@@ -3,8 +3,7 @@ import sys
 import os
 
 # Path to tesseract executable
-tesseract_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-pytesseract.tesseract_cmd = tesseract_path
+pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 def extract_text(image_path):
     if not os.path.exists(image_path):
