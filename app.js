@@ -15,34 +15,34 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, ''))
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) =>
+    cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, ''))
 });
 const upload = multer({ storage });
 
 // OCR endpoint
 app.post('/ocr', upload.single('image'), (req, res) => {
-    if (!req.file) return res.status(400).json({ text: 'No file uploaded' });
+  if (!req.file) return res.status(400).json({ text: 'No file uploaded' });
 
-    const scriptPath = path.join(__dirname, 'imgtotext.py');
+  const scriptPath = path.join(__dirname, 'imgtotext.py');
 
-    // Use 'python3' for Render Linux environment
-    const pythonProcess = spawn('python', [scriptPath, req.file.path]);
+  const pythonProcess = spawn('python3', [scriptPath, req.file.path]);
 
-    let output = '';
-    pythonProcess.stdout.on('data', (data) => output += data.toString());
-    pythonProcess.stderr.on('data', (data) => console.error(data.toString()));
+  let output = '';
+  pythonProcess.stdout.on('data', (data) => (output += data.toString()));
+  pythonProcess.stderr.on('data', (data) => console.error(data.toString()));
 
-   pythonProcess.on('close', (code) => {
+  pythonProcess.on('close', (code) => {
     fs.unlinkSync(req.file.path); // delete after processing
 
     if (code !== 0) {
-        return res.status(500).json({ text: 'OCR process failed' });
+      return res.status(500).json({ text: 'OCR process failed' });
     }
     res.json({ text: output.trim() });
-    });
+  });
 });
 
-// Use PORT from environment (Render sets it)
+// Use Render's PORT variable
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
