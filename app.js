@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ensure uploads folder exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
@@ -28,17 +27,19 @@ app.post('/ocr', upload.single('image'), (req, res) => {
     const scriptPath = path.join(__dirname, 'imgtotext.py');
 
     // Use 'python3' for Render Linux environment
-    const pythonProcess = spawn('python3', [scriptPath, req.file.path]);
+    const pythonProcess = spawn('python', [scriptPath, req.file.path]);
 
     let output = '';
     pythonProcess.stdout.on('data', (data) => output += data.toString());
     pythonProcess.stderr.on('data', (data) => console.error(data.toString()));
 
-    pythonProcess.on('close', (code) => {
-        if (code !== 0) {
-            return res.status(500).json({ text: 'OCR process failed' });
-        }
-        res.json({ text: output.trim() });
+   pythonProcess.on('close', (code) => {
+    fs.unlinkSync(req.file.path); // delete after processing
+
+    if (code !== 0) {
+        return res.status(500).json({ text: 'OCR process failed' });
+    }
+    res.json({ text: output.trim() });
     });
 });
 

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: wordscanner-backend
+    env: node
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
