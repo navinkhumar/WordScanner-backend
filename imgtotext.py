@@ -4,13 +4,13 @@ import shutil
 import traceback
 from pytesseract import pytesseract
 
+# Auto-detect Tesseract binary
 tesseract_path = shutil.which("tesseract")
-if tesseract_path:
-    pytesseract.tesseract_cmd = tesseract_path
-    print(f"[DEBUG] Using tesseract at: {tesseract_path}", flush=True)
-else:
+if not tesseract_path:
     print("[ERROR] Tesseract binary not found in PATH", flush=True)
-
+    sys.exit(1)
+pytesseract.tesseract_cmd = tesseract_path
+print(f"[DEBUG] Using tesseract at: {tesseract_path}", flush=True)
 
 def extract_text(image_path: str) -> int:
     print(f"[DEBUG] Starting OCR for: {image_path}", flush=True)
@@ -35,6 +35,5 @@ if __name__ == "__main__":
         print("[ERROR] No image path provided", flush=True)
         sys.exit(1)
 
-    print(f"[DEBUG] Using tesseract binary: {pytesseract.tesseract_cmd}", flush=True)
     exit_code = extract_text(sys.argv[1])
     sys.exit(exit_code)
