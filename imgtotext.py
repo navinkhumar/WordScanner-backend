@@ -1,10 +1,16 @@
 import sys
 import os
+import shutil
 import traceback
 from pytesseract import pytesseract
 
-# Explicitly set tesseract binary
-pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+tesseract_path = shutil.which("tesseract")
+if tesseract_path:
+    pytesseract.tesseract_cmd = tesseract_path
+    print(f"[DEBUG] Using tesseract at: {tesseract_path}", flush=True)
+else:
+    print("[ERROR] Tesseract binary not found in PATH", flush=True)
+
 
 def extract_text(image_path: str) -> int:
     print(f"[DEBUG] Starting OCR for: {image_path}", flush=True)
